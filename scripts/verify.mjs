@@ -4,14 +4,21 @@ import vm from 'node:vm';
 
 const code = fs.readFileSync('dist/data.js','utf8');
 const {entries,links} = vm.runInNewContext(code+';HEALTHOPEDIA;');
-assert.equal(entries.length,661);
-assert.equal(new Set(entries.map(e=>e.id)).size,661);
+assert.equal(entries.length,662);
+assert.equal(new Set(entries.map(e=>e.id)).size,662);
 assert.equal(entries.filter(e=>!e.catalog&&e.type==='guide').length,14);
 assert.equal(entries.filter(e=>!e.catalog&&e.type==='reference').length,14);
 const whoEntries=entries.filter(e=>!e.catalog);
 assert.equal(whoEntries.length,28);
-assert.equal(entries.filter(e=>e.catalog).length,633);
-assert.deepEqual(new Set(entries.filter(e=>e.catalog).map(e=>e.sourceLabel)),new Set(['3,000 Remedies · source index']));
+assert.equal(entries.filter(e=>e.catalog).length,634);
+const sourceLabels = new Set(entries.filter(e=>e.catalog).map(e=>e.sourceLabel));
+assert.ok([...sourceLabels].some(label => label.includes('3,000 Remedies')));
+assert.ok(sourceLabels.has('Swiss Cancer League assessment'));
+const cancerEntry = entries.find(e => e.id === 'source-cancer-claims');
+assert.equal(cancerEntry.type,'reference');
+assert.equal(cancerEntry.sourceReview,true);
+assert.match(cancerEntry.reason,/not validate/);
+assert.match(cancerEntry.safety,/Do not use this as cancer treatment/);
 const starts=[1,7,13,17,23,31,37,43,49,55,61,67,71,79,85,91,97,105,111,117,125,129,135,141,147,151,157,163];
 assert.deepEqual(Array.from(whoEntries,e=>e.page),starts);
 for (const e of entries) {
@@ -22,7 +29,7 @@ for (const e of entries) {
   else {assert.ok(e.reason);assert.equal(e.steps,undefined);}
   if(e.extraLink) assert.ok(links[e.extraLink]);
 }
-for(const id of ['dhattura','daruharidra','triphala','lashuna','lodhra','haridra-wound','chaturbhadra','kapikacchu']) {
+for(const id of ['dhattura','daruharidra','triphala','lashuna','lodhra','haridra-wound','chaturbhadra','kapikacchu','source-cancer-claims']) {
   assert.equal(entries.find(e=>e.id===id).type,'reference',`${id}: high-risk recipe exposed`);
 }
 assert.match(entries.find(e=>e.id==='ashvagandha').safety,/pregnancy and breastfeeding/);
@@ -44,6 +51,7 @@ assert.match(app,/not the full Hulda Clark book/);
 assert.match(app,/card-art/);
 assert.match(app,/loading="lazy"/);
 assert.match(app,/Source claim · no recipe/);
+assert.match(app,/Source review · no treatment protocol/);
 assert.match(app,/conditionAliases/);
 assert.match(app,/erectile dysfunction/);
 assert.match(app,/period pain/);
@@ -52,4 +60,4 @@ assert.match(app,/data-card-open/);
 assert.match(app,/ingredient-gallery/);
 assert.match(css,/ingredient-atlas\.png/);
 new vm.Script(app);
-console.log('PASS: 28 WHO monographs; 14 guides; 14 WHO references; 633 source-index cards covering all 3,000 TOC entries; safety boundaries; no remote assets or raw PDFs in dist.');
+console.log('PASS: 28 WHO monographs; 14 guides; 14 WHO references; 633 source-index cards plus 1 cancer source-review card; safety boundaries; no remote assets or raw PDFs in dist.');

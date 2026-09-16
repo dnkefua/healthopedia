@@ -288,5 +288,32 @@ const HEALTHOPEDIA = (() => {
     evidence:'The complete source index ends with this Chamomile listing on PDF page 1002. It has not been clinically validated by Healthopedia.',
     sourceLabel:'3,000 Remedies · source index', sourceClaim:'Full TOC entry 3000: Chamomile / irritability and help with sleep in children.'
   });
+  entries.push({
+    id:'source-cancer-claims',
+    name:'Cancer cure claims',
+    form:'Critical source review, not a recipe',
+    category:'General health',
+    concern:'General health',
+    condition:'Cancer cure claims',
+    botanical:'Hulda Clark cancer-cure assessment',
+    use:'The supplied cancer PDF is treated as a critical assessment of cure claims, not as a Healthopedia treatment protocol.',
+    page:1,
+    detailPages:'1-3',
+    catalog:true,
+    sourceReview:true,
+    type:'reference',
+    ingredients:[
+      I('Black walnut hull','Named in Clark-style parasite protocols','Listed only to identify the claim being reviewed. Healthopedia does not provide a cancer protocol, dose or administration schedule.'),
+      I('Wormwood','Named in Clark-style parasite protocols','Listed only as part of the disputed source claim. It is not presented as an anticancer medicine.'),
+      I('Cloves','Named in Clark-style parasite protocols','A culinary spice in ordinary contexts; the cancer-cure claim is not validated here.'),
+      I('Electrical “zapper” device','Device claim, not an herb','The assessment discusses device-based claims; Healthopedia does not promote electrical devices as cancer treatment.')
+    ],
+    safety:'Do not use this as cancer treatment or stop oncology care. Herbs, supplements and devices can delay effective treatment or interact with chemotherapy, radiotherapy, surgery or supportive medicines. Discuss any complementary approach with the cancer-care team.',
+    reason:'The supplied PDF reports that the cancer-cure claims lack convincing scientific support. Reproducing the protocol as a recipe would imply a treatment that this app cannot validate.',
+    evidence:'This entry preserves the existence of the supplied cancer document for search and review only. The National Cancer Institute states that no special diet, food, vitamin, mineral, dietary supplement, herb or combination has been proven to slow, cure or prevent cancer recurrence.',
+    sourceLabel:'Swiss Cancer League assessment',
+    sourceClaim:'Supplied assessment of Hulda Clark cancer-cure claims; no cancer-treatment recipe is published.',
+    keywords:['cancer','tumor','tumour','malignancy','oncology','hulda clark','cure for all cancers','parasite protocol','zapper','black walnut','wormwood','cloves']
+  });
   return Object.freeze({links,entries,reviewDate:'15 September 2026'});
 })();

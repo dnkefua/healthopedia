@@ -33,7 +33,7 @@ function boot(initial, blocked = false) {
 for (const initial of ['not JSON','null','{}','123','["obsolete-id"]']) {
   const app=boot(initial);
   assert.equal(app.element('saved-count').textContent,0);
-    assert.equal((app.element('grid').innerHTML.match(/class="card"/g)||[]).length,661);
+    assert.equal((app.element('grid').innerHTML.match(/class="card"/g)||[]).length,662);
 }
 const valid=boot('["trikatu","trikatu","missing"]');
 assert.equal(valid.element('saved-count').textContent,1);
@@ -55,7 +55,9 @@ for (const [query, expected] of [
   ['pink eye','Conjunctivitis'],
   ['hemorrhoids','Haemorrhoids / piles'],
   ['UTI','Urinary disorders'],
-  ['worms','Intestinal parasites']
+  ['worms','Intestinal parasites'],
+  ['cancer','Cancer cure claims'],
+  ['hulda clark','Cancer cure claims']
 ]) {
   assert.match(searchApp.search(query), new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')), `${query} should find ${expected}`);
 }
@@ -78,4 +80,10 @@ assert.match(cardApp.element('dialog-content').innerHTML,/Constituents first/);
 assert.match(cardApp.element('dialog-content').innerHTML,/ingredient-gallery/);
 assert.match(cardApp.element('dialog-content').innerHTML,/Preparation method/);
 assert.ok(cardApp.element('dialog-content').innerHTML.indexOf('Constituents first') < cardApp.element('dialog-content').innerHTML.indexOf('Preparation method'));
+const cancerApp=boot('[]');
+cancerApp.openCard('source-cancer-claims');
+assert.equal(cancerApp.element('detail').open,true);
+assert.match(cancerApp.element('dialog-content').innerHTML,/Source review · no treatment protocol/);
+assert.match(cancerApp.element('dialog-content').innerHTML,/Do not use this as cancer treatment/);
+assert.doesNotMatch(cancerApp.element('dialog-content').innerHTML,/Preparation method/);
 console.log('PASS: malformed, wrong-type, duplicate, unknown and blocked storage; in-session save fallback; valid collection writes; ailment synonym search; concern and ailment buttons; card opens ingredient-first detail.');
