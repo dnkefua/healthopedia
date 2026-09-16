@@ -8,7 +8,7 @@ function boot(initial, blocked = false) {
   const events = new Map();
   const values = new Map([['healthopedia-collection-v2',initial]]);
   const element = id => {
-    if (!elements.has(id)) elements.set(id, {innerHTML:'',textContent:'',value:'',hidden:false,open:false,dataset:{},classList:{add(){},remove(){}},addEventListener(event,fn){events.set(`${id}:${event}`,fn);},setAttribute(){},querySelector(){return null;},focus(){}});
+    if (!elements.has(id)) elements.set(id, {innerHTML:'',textContent:'',value:'',hidden:false,open:false,dataset:{},classList:{add(){},remove(){}},addEventListener(event,fn){events.set(`${id}:${event}`,fn);},setAttribute(){},querySelector(){return null;},focus(){},showModal(){this.open=true;},close(){this.open=false;}});
     return elements.get(id);
   };
   const document={getElementById:element,querySelectorAll:()=>[],activeElement:null,addEventListener:(event,fn)=>events.set(event,fn)};
@@ -23,7 +23,11 @@ function boot(initial, blocked = false) {
     events.get('search:input')({target:{value:query}});
     return element('grid').innerHTML;
   }
-  return {element,values,save,search,clickButton};
+  function openCard(id){
+    const card={dataset:{cardOpen:id}};
+    events.get('grid:click')({target:{closest:selector=>selector==='button,a'?null:selector==='[data-card-open]'?card:null}});
+  }
+  return {element,values,save,search,clickButton,openCard};
 }
 
 for (const initial of ['not JSON','null','{}','123','["obsolete-id"]']) {
@@ -67,4 +71,11 @@ buttonApp.clickButton({category:'Pain'});
 assert.match(buttonApp.element('ailment-buttons').innerHTML,/Growing pains/);
 assert.match(buttonApp.element('ailment-buttons').innerHTML,/Joint pain/);
 assert.ok((buttonApp.element('grid').innerHTML.match(/class="card"/g)||[]).length > 3);
-console.log('PASS: malformed, wrong-type, duplicate, unknown and blocked storage; in-session save fallback; valid collection writes; ailment synonym search; concern and ailment buttons.');
+const cardApp=boot('[]');
+cardApp.openCard('trikatu');
+assert.equal(cardApp.element('detail').open,true);
+assert.match(cardApp.element('dialog-content').innerHTML,/Constituents first/);
+assert.match(cardApp.element('dialog-content').innerHTML,/ingredient-gallery/);
+assert.match(cardApp.element('dialog-content').innerHTML,/Preparation method/);
+assert.ok(cardApp.element('dialog-content').innerHTML.indexOf('Constituents first') < cardApp.element('dialog-content').innerHTML.indexOf('Preparation method'));
+console.log('PASS: malformed, wrong-type, duplicate, unknown and blocked storage; in-session save fallback; valid collection writes; ailment synonym search; concern and ailment buttons; card opens ingredient-first detail.');
