@@ -1,0 +1,6 @@
+sources/*.pdf
+sources/*.html
+*.tar.gz
+*.zip
+tmp/
+.sites-runtime/
