@@ -8,7 +8,7 @@ function boot(initial, blocked = false) {
   const events = new Map();
   const values = new Map([['healthopedia-collection-v2',initial]]);
   const element = id => {
-    if (!elements.has(id)) elements.set(id, {innerHTML:'',textContent:'',value:'',hidden:false,open:false,dataset:{},classList:{add(){},remove(){}},addEventListener(event,fn){events.set(`${id}:${event}`,fn);},setAttribute(){},querySelector(){return null;},focus(){},showModal(){this.open=true;},close(){this.open=false;}});
+    if (!elements.has(id)) elements.set(id, {innerHTML:'',textContent:'',value:'',hidden:false,open:false,dataset:{},classList:{add(){},remove(){}},addEventListener(event,fn){events.set(`${id}:${event}`,fn);},setAttribute(){},querySelector(){return null;},focus(){},scrollIntoView(){},showModal(){this.open=true;},close(){this.open=false;}});
     return elements.get(id);
   };
   const document={getElementById:element,querySelectorAll:()=>[],activeElement:null,addEventListener:(event,fn)=>events.set(event,fn)};
@@ -16,7 +16,7 @@ function boot(initial, blocked = false) {
   const context=vm.createContext({document,localStorage,setTimeout:()=>0,clearTimeout(){},window:{}});
   vm.runInContext(fs.readFileSync('dist/data.js','utf8'),context);
   vm.runInContext(fs.readFileSync('dist/app.js','utf8'),context);
-  function clickButton(dataset){const button={dataset,hasAttribute:name=>name==='data-reset'&&dataset.reset!==undefined};events.get('click')({target:{closest:selector=>selector==='button'?button:null}});}
+  function clickButton(dataset){const button={dataset,hasAttribute:name=>name==='data-reset'&&dataset.reset!==undefined,focus(){}};events.get('click')({target:{closest:selector=>selector==='button'?button:null}});}
   function save(id){clickButton({save:id});}
   function search(query){
     element('search').value=query;
@@ -86,4 +86,11 @@ assert.equal(cancerApp.element('detail').open,true);
 assert.match(cancerApp.element('dialog-content').innerHTML,/Source review · no treatment protocol/);
 assert.match(cancerApp.element('dialog-content').innerHTML,/Do not use this as cancer treatment/);
 assert.doesNotMatch(cancerApp.element('dialog-content').innerHTML,/Preparation method/);
-console.log('PASS: malformed, wrong-type, duplicate, unknown and blocked storage; in-session save fallback; valid collection writes; ailment synonym search; concern and ailment buttons; card opens ingredient-first detail.');
+const sourcesApp=boot('[]');
+sourcesApp.clickButton({view:'sources'});
+assert.match(sourcesApp.element('sources-view').innerHTML,/pdf-library/);
+assert.match(sourcesApp.element('pdf-source-summary').innerHTML,/Traditional Herbal Remedies/);
+sourcesApp.clickButton({sourceDoc:'cancer'});
+assert.match(sourcesApp.element('pdf-source-summary').innerHTML,/Cure for All Cancers/);
+assert.match(sourcesApp.element('pdf-frame').title,/Cure for All Cancers/);
+console.log('PASS: malformed, wrong-type, duplicate, unknown and blocked storage; in-session save fallback; valid collection writes; ailment synonym search; concern and ailment buttons; card opens ingredient-first detail; source reader switches PDFs.');
