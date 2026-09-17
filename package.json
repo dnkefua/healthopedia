@@ -1,0 +1,17 @@
+{
+  "name": "healthopedia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Healthopedia educational herbal reference library",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/verify.mjs && node scripts/verify-storage.mjs",
+    "deploy:firebase": "npm run build && npm test && firebase deploy --only hosting --project healthopedia-eb29f"
+  },
+  "dependencies": {
+    "firebase": "12.19.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

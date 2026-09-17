@@ -39,7 +39,7 @@ assert.match(html,/<dialog[^>]+aria-labelledby="dialog-title"/);
 for(const filename of ['app.js','data.js','styles.css']) assert.ok(html.includes(filename));
 assert.ok(!html.includes('https://'), 'Unexpected remote asset in HTML');
 const published=fs.readdirSync('dist');
-assert.deepEqual(published.sort(),['app.js','assets','data.js','index.html','styles.css']);
+assert.deepEqual(published.sort(),['app.js','assets','data.js','firebase.js','index.html','styles.css']);
 const assets=fs.readdirSync('dist/assets');
 assert.deepEqual(assets.sort(),['ingredient-atlas.png','recipe-digestive.webp','recipe-general.webp','recipe-respiratory.webp','recipe-skin.webp']);
 for(const asset of assets) assert.ok(fs.statSync(`dist/assets/${asset}`).size > 100000);

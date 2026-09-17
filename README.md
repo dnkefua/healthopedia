@@ -30,4 +30,22 @@ Browser checks completed: combined search/topic/type filters, empty results, sav
 
 ## Hosting
 
-The existing Sites project is recorded in `.openai/hosting.json`. The current connector reports `Sites project not found` for that exact ID, so this revision has not been published. Do not replace the project ID or claim a live URL without reconnecting the existing project and confirming a successful deployment. The self-contained distributable is the `dist` directory.
+Firebase project: `healthopedia-eb29f`. Web app: `1:752701892749:web:4ae441c35e04fecd4b5ac4`.
+
+Firebase Hosting serves `dist` at https://healthopedia-eb29f.web.app (also https://healthopedia-eb29f.firebaseapp.com). GitHub Pages remains a separate deployment at https://dnkefua.github.io/healthopedia/.
+
+The modular Firebase SDK is bundled locally into `dist/firebase.js`; the browser does not load a remote SDK. Its public app configuration is in `src/firebase-config.js`. Firebase initialization is independent of library rendering, so the library and local collections continue working if initialization fails. No Analytics, Authentication, Firestore, Storage uploads or cloud collection syncing is enabled by this setup. The SDK app container is available as `window.healthopediaFirebase.app` for future integrations. Its initialized project and status are also exposed as `data-firebase-project` and `data-firebase-status` on the HTML element for diagnostics.
+
+To rebuild and publish (with Node.js and the Firebase CLI installed):
+
+```sh
+npm ci
+npm run build
+npm test
+firebase login
+firebase deploy --only hosting --project healthopedia-eb29f
+```
+
+On Windows PowerShell with restricted script execution, use `npm.cmd` and `firebase.cmd`. `npm run deploy:firebase` combines the build, checks and Hosting deployment. The hosting-only deployment does not change database rules, authentication providers, billing or other Firebase services. `.firebaserc` selects the project and `firebase.json` explicitly selects its Hosting site. The historical `.openai/hosting.json` is retained but is not used for Firebase deployment.
+
+Never commit Firebase CLI login tokens, service-account private keys or Admin SDK credentials. Firebase browser configuration is public by design; any future database access must be protected by authentication and server-enforced security rules.
