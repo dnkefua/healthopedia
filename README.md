@@ -49,3 +49,11 @@ firebase deploy --only hosting --project healthopedia-eb29f
 On Windows PowerShell with restricted script execution, use `npm.cmd` and `firebase.cmd`. `npm run deploy:firebase` combines the build, checks and Hosting deployment. The hosting-only deployment does not change database rules, authentication providers, billing or other Firebase services. `.firebaserc` selects the project and `firebase.json` explicitly selects its Hosting site. The historical `.openai/hosting.json` is retained but is not used for Firebase deployment.
 
 Never commit Firebase CLI login tokens, service-account private keys or Admin SDK credentials. Firebase browser configuration is public by design; any future database access must be protected by authentication and server-enforced security rules.
+
+## Android / Google Play
+
+The Capacitor Android application uses package ID `com.ndnanalyticsinc.healthopedia`, targets Android 36, and packages the complete `dist` library for local use. Build with `npm run android:bundle`. The generated release bundle is under `android/app/build/outputs/bundle/release/`.
+
+The 3D Healthopedia logo is stored at `resources/icon.png` and `dist/assets/healthopedia-logo-3d.png`; Android launcher, adaptive-icon and splash assets are generated from it with `npx capacitor-assets generate --android`.
+
+Release signing uses the untracked files `android/keystore/healthopedia-upload.jks` and `android/keystore.properties`. They must be backed up securely: the upload key is required for future Play releases. The keystore and its passwords are deliberately excluded from Git. Store listing copy is maintained in `store-listing/en-US.txt`; the public privacy policy is `/privacy.html` on Firebase Hosting.

@@ -1,0 +1,24 @@
+App name: Healthopedia
+
+Short description:
+Explore source-referenced herbal preparations, ingredients, and safety notes.
+
+Full description:
+Healthopedia is a free educational herbal knowledge library from NDN Analytics Inc.
+
+Browse 662 ailment-oriented references drawn from three supplied source documents. Search by concern, ailment, herb, ingredient, or traditional use. Each detailed entry starts with the named ingredients and visual guides, then explains the ingredient roles, source context, preparation information where appropriate, evidence limits, and safety cautions.
+
+Key features:
+• Browse by ailments such as cough, digestion, pain, toothache, reproductive health, and more
+• Review ingredient images before reading preparation details
+• Search plants, ingredients, traditional indications, and common ailment terms
+• Save a private collection on your device
+• Trace entries back to their source documents
+• Distinguish preparation guides from reference-only safety records
+• Use without creating an account
+
+Healthopedia is an educational reference. Traditional use is not proof of benefit. The app does not diagnose, prescribe, dispense medicines, or replace professional medical care. Some source claims are retained only for critical review and are clearly labeled.
+
+Category: Medical
+Contact website: https://www.ndnanalytics.com
+Privacy policy: https://healthopedia-eb29f.web.app/privacy.html

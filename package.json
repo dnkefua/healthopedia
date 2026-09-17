@@ -6,12 +6,19 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node scripts/verify.mjs && node scripts/verify-storage.mjs",
-    "deploy:firebase": "npm run build && npm test && firebase deploy --only hosting --project healthopedia-eb29f"
+    "deploy:firebase": "npm run build && npm test && firebase deploy --only hosting --project healthopedia-eb29f",
+    "android:sync": "npm run build && cap sync android",
+    "android:bundle": "npm run android:sync && cd android && gradlew.bat bundleRelease",
+    "store:assets": "node scripts/generate-store-assets.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/core": "8.5.2",
     "firebase": "12.19.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "8.5.2",
     "esbuild": "0.28.2"
   }
 }

@@ -1,0 +1,17 @@
+{
+  "name": "Healthopedia",
+  "short_name": "Healthopedia",
+  "description": "A free, source-referenced herbal knowledge library.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f4ec",
+  "theme_color": "#173f35",
+  "icons": [
+    {
+      "src": "assets/healthopedia-logo-3d.png",
+      "sizes": "1536x1536",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

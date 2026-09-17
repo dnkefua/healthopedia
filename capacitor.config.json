@@ -1,0 +1,11 @@
+{
+  "appId": "com.ndnanalyticsinc.healthopedia",
+  "appName": "Healthopedia",
+  "webDir": "dist",
+  "backgroundColor": "#f6f4ec",
+  "android": {
+    "backgroundColor": "#f6f4ec",
+    "allowMixedContent": false,
+    "captureInput": true
+  }
+}

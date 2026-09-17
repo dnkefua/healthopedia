@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Healthopedia</string>
+    <string name="title_activity_main">Healthopedia</string>
+    <string name="package_name">com.ndnanalyticsinc.healthopedia</string>
+    <string name="custom_url_scheme">com.ndnanalyticsinc.healthopedia</string>
+</resources>
