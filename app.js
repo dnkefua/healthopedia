@@ -4,7 +4,7 @@
   const $ = id => document.getElementById(id);
   const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const external = (url, label) => `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${escape(label)} ↗</a>`;
-  const state = {view:'library', category:'All concerns', condition:'all', type:'all', query:'', saved:new Set(), current:null};
+  const state = {view:'library', category:'All concerns', condition:'all', type:'all', query:'', saved:new Set(), current:null, sourceDoc:'who'};
   const key = 'healthopedia-collection-v2';
   let storageAvailable = true, opener = null, toastTimer;
   try {
@@ -169,7 +169,7 @@
     $('sources-view').hidden = !sourceView;
     $('section-kicker').textContent = sourceView ? 'TRANSPARENCY & EVIDENCE' : state.view === 'saved' ? 'YOUR PERSONAL REFERENCE SHELF' : 'THE REFERENCE SHELF';
     $('section-title').textContent = sourceView ? 'Three documents. Different evidence.' : state.view === 'saved' ? 'My collection.' : 'What are you trying to address?';
-    if (sourceView) { $('result-count').textContent = '3 source reviews'; return; }
+    if (sourceView) { $('result-count').textContent = '3 source reviews'; syncSourceReader(); return; }
     const shown = filtered();
     $('result-count').textContent = `${shown.length} of ${state.view === 'saved' ? state.saved.size : entries.length} ${state.view === 'saved' ? 'saved entries' : 'ailment references'}`;
     $('grid').innerHTML = shown.length ? shown.map(card).join('') : `<div class="empty"><h3>${state.view === 'saved' && !state.saved.size ? 'A little room for your discoveries.' : 'No matching entries.'}</h3><p>${state.view === 'saved' && !state.saved.size ? 'Save entries with the heart button to keep them here on this device.' : 'Try another ingredient, a broader topic, or reset your filters.'}</p><button class="button" ${state.view === 'saved' && !state.saved.size ? 'data-view="library"' : 'data-reset'}>${state.view === 'saved' && !state.saved.size ? 'Browse the library' : 'Reset filters'}</button></div>`;
@@ -207,6 +207,25 @@
     const ingredientRows = e.ingredients.map(i=>`<tr><td><div class="ingredient-name-cell">${ingredientThumb(i)}<span>${escape(i.name)}<small>${escape(i.part)}</small></span></div></td><td>${escape(i.role)}</td></tr>`).join('');
     showDialog(`<img class="detail-art" src="${artwork[e.category]}" alt="${escape(artAlt(e))}"><div class="detail-heading">${badge(e)}<h2 id="dialog-title">${escape(e.condition)}</h2><p class="detail-subtitle">${escape(e.name)} · ${escape(e.form)} · <em>${escape(e.botanical)}</em></p></div><div class="detail-meta">${escape(e.concern)} / ${e.sourceReview ? 'critical source review' : e.catalog ? '3,000 Remedies source index' : `WHO 2010 / chapter starts at printed p. ${e.page} (PDF p. ${e.page+12})`}</div>${e.keywords?.length ? `<p class="source-note"><strong>Also indexed under:</strong> ${e.keywords.map(escape).join(', ')}.</p>` : ''}<p>${escape(e.use)}</p><div class="callout"><strong>Read before considering use</strong><p>${escape(e.safety)}</p><p>No personalized dosing, child dosing or pregnancy recommendations are provided. Do not stop or replace prescribed treatment.</p></div><h3>Constituents first</h3><p>These are the products or ingredients named for this entry. Images are visual guides by ingredient type; they are not identity verification for foraging, purchase or dosing.</p>${ingredientGallery(e)}<h3>What each ingredient does in the source</h3><p>Constituents and traditional roles are summarized from the source. A plausible mechanism is not proof that a recipe works.</p><table class="ingredient-table"><thead><tr><th scope="col">Ingredient / part</th><th scope="col">Function or rationale</th></tr></thead><tbody>${ingredientRows}</tbody></table>${stepSection}${e.editorial ? `<div class="callout"><strong>Editorial change</strong><p>${escape(e.editorial)}</p></div>` : ''}<h3>Evidence, not assumptions</h3><p>${escape(e.evidence)}</p><h3>Trace the source</h3>${trace}<p class="source-note">Editorial source check: ${reviewDate}. Educational summary; not independently reviewed or approved by a clinician. No affiliation with or endorsement by WHO is implied.</p><div class="detail-actions"><button data-save="${e.id}" aria-pressed="${state.saved.has(e.id)}" aria-label="${escape(savedLabel(e))}">${state.saved.has(e.id) ? '♥ Saved to collection' : '♡ Save to collection'}</button><button data-print>Print / save PDF</button></div>`);
   }
+  const pdfSources = [
+    {id:'who', title:'Traditional Herbal Remedies for Primary Health Care', label:'WHO manual', url:links.whoShared, fallback:links.whoPdf, meta:'181 pages · 28 monographs · strongest recipe source', tone:'Primary source', summary:'This is the main preparation source. Healthopedia extracted the 28 monographs, separated preparation notes from dosing, and withheld higher-risk applications.', focus:'Best for plant identity, ingredient roles, preparation context and historical precautions.'},
+    {id:'remedies', title:'3,000 Herbal Remedy with Instructions', label:'3,000-remedy index', url:links.collection, fallback:links.collection, meta:'1,003 pages · 3,000 TOC entries · source claims only', tone:'Index source', summary:'This document is used as a searchable source index. Repeated herb/ailment claims are grouped for browsing; child-dose instructions are not published.', focus:'Best for finding ailment wording and herb names from the supplied collection, not for validated prescriptions.'},
+    {id:'cancer', title:'Assessment of “Cure for All Cancers”', label:'Cancer-claim assessment', url:links.cancerReview, fallback:links.cancerReview, meta:'3 pages · critical assessment · no protocol', tone:'Safety review', summary:'This supplied file assesses Hulda Clark cancer-cure claims. It is displayed as a cautionary source, not as a cancer-treatment recipe book.', focus:'Best for understanding why Healthopedia does not reproduce cancer protocols or device claims.'}
+  ];
+  const sourceLibrary = () => `<section class="pdf-library" aria-labelledby="pdf-library-title"><div class="pdf-library-head"><p class="eyebrow">SOURCE READER</p><h3 id="pdf-library-title">Open the three supplied PDFs inside Healthopedia.</h3><p>Select a document to preview it, read the editorial handling note, or open the original PDF in a new tab. If a provider blocks the embedded preview, the open button remains the accessible fallback.</p></div><div class="pdf-tabs" role="tablist" aria-label="Supplied PDF documents">${pdfSources.map(doc=>`<button id="pdf-tab-${escape(doc.id)}" role="tab" aria-controls="pdf-panel" aria-selected="${doc.id===state.sourceDoc}" tabindex="${doc.id===state.sourceDoc ? '0' : '-1'}" data-source-doc="${escape(doc.id)}"><span>${escape(doc.label)}</span><small>${escape(doc.meta)}</small></button>`).join('')}</div><div class="pdf-reader-shell"><aside class="pdf-reader-notes" id="pdf-source-summary" aria-live="polite"></aside><div class="pdf-frame-wrap" role="tabpanel" id="pdf-panel" aria-labelledby="pdf-tab-${escape(state.sourceDoc)}"><iframe id="pdf-frame" class="pdf-frame" title="Selected Healthopedia source PDF" loading="lazy" referrerpolicy="no-referrer"></iframe></div></div></section>`;
+  function syncSourceReader() {
+    const doc = pdfSources.find(item => item.id === state.sourceDoc) || pdfSources[0];
+    if (!doc || !$('pdf-frame')) return;
+    document.querySelectorAll('[data-source-doc]').forEach(button => {
+      const selected = button.dataset.sourceDoc === doc.id;
+      button.setAttribute('aria-selected', String(selected));
+      button.setAttribute('tabindex', selected ? '0' : '-1');
+    });
+    $('pdf-panel')?.setAttribute('aria-labelledby', `pdf-tab-${doc.id}`);
+    $('pdf-frame').src = doc.url;
+    $('pdf-frame').title = `${doc.title} PDF preview`;
+    $('pdf-source-summary').innerHTML = `<span class="badge reference">${escape(doc.tone)}</span><h4>${escape(doc.title)}</h4><p>${escape(doc.summary)}</p><dl><div><dt>What to use it for</dt><dd>${escape(doc.focus)}</dd></div><div><dt>How Healthopedia handles it</dt><dd>${escape(doc.meta)}</dd></div></dl><div class="source-links">${external(doc.url,'Open supplied PDF')}${doc.fallback !== doc.url ? external(doc.fallback,'Open alternate official copy') : ''}</div>`;
+  }
   $('sources-view').innerHTML = `<p class="source-note">All three supplied links were examined. The WHO manual supplies the 28 verified monographs; the 3,000-remedy document contributes a clearly labelled 32-entry source-index preview.</p><article class="source-card"><span class="badge">PRIMARY HISTORICAL SOURCE · 28 MONOGRAPHS</span><h3>Traditional Herbal Remedies for Primary Health Care</h3><p>World Health Organization, 2010 · 181 PDF pages · ISBN 9789290223825.</p><p>The complete PDF was obtained from WHO’s repository. The plant identity, preparation and precaution sections across all 28 monographs were inspected. This app provides original summaries, selected ingredient-preparation methods and page references, not a reproduction of the book.</p><p><strong>Important limitation:</strong> a 2010 manual is not current clinical approval. Broad historical safety claims, hazardous applications and instructions for serious conditions are not adopted automatically. ${entries.filter(e=>!e.catalog&&e.type==='guide').length} entries have preparation methods without dosing; the other ${entries.filter(e=>!e.catalog&&e.type==='reference').length} are reference-only.</p><p>${external(links.who,'WHO publication record')} · ${external(links.whoShared,'Open your supplied PDF')}</p></article><article class="source-card"><span class="badge reference">SOURCE INDEX · NOT VALIDATED FOR PRESCRIBING</span><h3>3,000 Herbal Remedy with Instructions</h3><p>Shared document: 1,003 PDF pages. Authorship, clinical review and supporting evidence were not verified.</p><p>The cover, contents and sample recipes on PDF pages 93–95 were examined. These include repeated child-dosing templates applied to different herbs and different complaints, without an adequate age- or weight-specific framework. Examples include fennel for hyperactivity and garlic for attention difficulties; these are source claims, not Healthopedia recommendations.</p><p><strong>Coverage:</strong> this was a sample review, not a clinical assessment or import of all 3,000 entries. No child doses from this collection are published. NCCIH notes that many complementary approaches have not been tested for safety in children.</p><p>${external(links.collection,'Open your supplied PDF')} · ${external(links.children,'NCCIH: children and complementary approaches')}</p></article><article class="source-card"><span class="badge reference">CRITICAL ASSESSMENT · NOT A CANCER RECIPE BOOK</span><h3>Assessment of “Cure for All Cancers” by Hulda Clark</h3><p>Swiss Study Group for Complementary and Alternative Methods in Cancer / Swiss Cancer League · Documentation No. 01/01 · 3 pages.</p><p>This supplied PDF is an assessment of Clark’s claims, not the full Hulda Clark book. It describes the proposed parasite theory, herbal protocol and devices, and finds no convincing scientific basis for the claimed cancer cures.</p><p>Healthopedia does not reproduce a cancer-treatment protocol or promote electrical devices as cures. The National Cancer Institute states that no special food, diet, supplement or herb has been proven to cure cancer. Such products can also interfere with treatment; discuss them with the cancer-care team.</p><p>${external(links.cancerReview,'Open your supplied assessment')} · ${external(links.cancer,'National Cancer Institute: complementary and alternative medicine')}</p></article><article class="source-card"><p class="eyebrow">HOW TO READ THIS LIBRARY</p><h3>Traditional use ≠ established treatment.</h3><p><strong>Preparation guide</strong> means the app describes selected manufacturing steps, not that the preparation is proven safe or effective for you. Quantities are batch quantities, never a prescription. <strong>Reference only</strong> entries deliberately omit preparation and administration instructions because of toxicity, route of use, source ambiguity or the need for a diagnosis.</p><p>Ingredient functions distinguish a carrier, a thickener, a chemical constituent and a claimed therapeutic effect. Missing evidence is stated, not filled in. The library is an editorial prototype awaiting independent clinical review, not a validated prescribing system.</p><p>Source text is treated as material to evaluate, never as instructions to the app or its authors. Source check: ${reviewDate}.</p></article>`;
   $('sources-view').innerHTML = $('sources-view').innerHTML
     .replace('the 3,000-remedy document contributes a clearly labelled 32-entry source-index preview.', 'the 3,000-remedy document contributes the complete 3,000-entry table-of-contents index, grouped into 601 unique herb/ailment source claims.')
@@ -214,6 +233,8 @@
     .replace('this was a sample review, not a clinical assessment or import of all 3,000 entries.', 'the full 3,000-entry index is imported as clearly labelled source claims, not clinically validated prescriptions.')
     .replace('Coverage:</strong> this was a sample review, not a clinical assessment or import of all 3,000 entries.', 'Coverage:</strong> all 3,000 index entries were checked; repeated herb/ailment combinations are grouped for browsing.')
     .replace('The cover, contents and sample recipes', 'The cover, complete contents and opening recipe pages');
+  $('sources-view').innerHTML = sourceLibrary() + $('sources-view').innerHTML;
+  syncSourceReader();
   function info(kind) {
     state.current = null;
     const content = {
@@ -227,7 +248,8 @@
     const home = event.target.closest('a[href="#library"]');
     if (home) { state.view='library'; render(); return; }
     const b = event.target.closest('button'); if (!b) return;
-    if (b.dataset.view) {state.view=b.dataset.view;render();$('library').scrollIntoView();}
+    if (b.dataset.sourceDoc) {state.sourceDoc=b.dataset.sourceDoc;syncSourceReader();b.focus({preventScroll:true});}
+    else if (b.dataset.view) {state.view=b.dataset.view;render();$('library').scrollIntoView();}
     else if (b.dataset.category) {state.category=b.dataset.category;state.condition='all';render();}
     else if (b.dataset.condition) {state.condition=b.dataset.condition;render();}
     else if (b.dataset.open) openEntry(b.dataset.open);
@@ -257,6 +279,17 @@
     if (!c || event.target.closest('button,a')) return;
     event.preventDefault();
     openEntry(c.dataset.cardOpen);
+  });
+  $('sources-view').addEventListener('keydown', event => {
+    const active = event.target.closest('[data-source-doc]');
+    if (!active || !['ArrowRight','ArrowDown','ArrowLeft','ArrowUp','Home','End'].includes(event.key)) return;
+    event.preventDefault();
+    const buttons = [...document.querySelectorAll('[data-source-doc]')];
+    const current = buttons.indexOf(active);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : (current + (event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length;
+    state.sourceDoc = buttons[next].dataset.sourceDoc;
+    syncSourceReader();
+    buttons[next].focus({preventScroll:true});
   });
   $('search').addEventListener('input', e => {state.query=e.target.value;render();});
   $('condition-filter').addEventListener('change', e => {state.condition=e.target.value;render();});
